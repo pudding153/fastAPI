@@ -29,17 +29,20 @@ class ChatRequest(BaseModel):
 @app.post("/api/chat")
 async def chat_endpoint(request: ChatRequest):
     message = request.message
+    success = True
+    ai_reply = ""
     #API
-try:
-    response = client.models.generate_content(
-    model="gemini-3.1-flash-lite",
-    contents=message
-    )
-    ai_reply = response.text
-except Exception as e:
-    print(f"error:{e}")
-    raise HTTPException(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail="error"
-    )
-    return {"reply":ai_reply}
+    try:
+        response = client.models.generate_content(
+        model="gemini-3.1-flash-lite",
+        contents=message
+        )
+        ai_reply = response.text
+    except Exception as e:
+        print(f"error:{e}")
+        ai_reply = f"error:{str(e)}"
+        success = False
+    return {
+        "success":success,
+        "reply":ai_reply
+    }
