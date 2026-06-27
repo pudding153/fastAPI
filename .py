@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI,HTTPException,status
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
@@ -30,9 +30,16 @@ class ChatRequest(BaseModel):
 async def chat_endpoint(request: ChatRequest):
     message = request.message
     #API
+try:
     response = client.models.generate_content(
-        model="gemini-3.1-flash-lite",
-        contents=message
+    model="gemini-3.1-flash-lite",
+    contents=message
     )
     ai_reply = response.text
-    return{"reply":ai_reply}
+except Exception as e:
+    print(f"error:{e}")
+    raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="error"
+    )
+    return {"reply":ai_reply}
