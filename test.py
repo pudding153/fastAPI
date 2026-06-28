@@ -7,7 +7,6 @@ from google import genai
 from google.genai import types
 from pydantic import BaseModel
 from typing import List
-import types
 #key
 load_dotenv()
 key = os.getenv("GEMINI_API_KEY")
@@ -34,3 +33,21 @@ async def chat_endpoint(req: Request):
 #会話履歴
     talk = body.get("history", [])
     talk.append({"role":"user","parts":[{"text":message}]})
+#api設定
+    s = ("setting")
+    ai_config=types.GenerateContentConfig(
+        system_instruction=s,
+        max_output_tokens=200
+)
+    response = client.models.generate_content(
+        contents=talk,
+        model="gemini-3.1-flash-lite",
+        config=ai_config
+)
+    talk.append({"role":"model","parts":[{"text":response.text}]})
+    #送り返す
+    return{
+        "success":True,
+        "reply":response.text,
+        "history":talk
+    }
